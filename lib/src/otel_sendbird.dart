@@ -1,15 +1,16 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_sendbird_suppression.dart';
 
 const _tracerName = 'dartastic_otel_libs_sendbird';
 
-Tracer _tracer() => OTel.tracerProvider().getTracer(_tracerName);
+APITracer _tracer() => OTelAPI.tracerProvider().getTracer(_tracerName);
 
 class SendbirdResult {
+  /// Creates a result.
   const SendbirdResult({
     this.appId,
     this.userId,
@@ -69,8 +70,13 @@ class SendbirdResult {
   final int? statusCode;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class SendbirdCallResult<T> {
+  /// Creates a call result.
   const SendbirdCallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final SendbirdResult? result;
 }
@@ -102,7 +108,7 @@ Future<T> tracedSendbird<T>({
   final span = _tracer().startSpan(
     'sendbird $operation',
     kind: SpanKind.client,
-    attributes: OTel.attributesFromMap(m),
+    attributes: OTelAPI.attributesFromMap(m),
   );
   try {
     final r = await invoke();
@@ -110,61 +116,61 @@ Future<T> tracedSendbird<T>({
       final res = r.result!;
       final extras = <Attribute<Object>>[];
       if (res.appId != null) {
-        extras.add(OTel.attributeString('sendbird.app.id', res.appId!));
+        extras.add(OTelAPI.attributeString('sendbird.app.id', res.appId!));
       }
       if (res.userId != null) {
-        extras.add(OTel.attributeString('sendbird.user.id', res.userId!));
+        extras.add(OTelAPI.attributeString('sendbird.user.id', res.userId!));
       }
       if (res.channelUrl != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'sendbird.channel.url',
           res.channelUrl!,
         ));
       }
       if (res.channelType != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'sendbird.channel.type',
           res.channelType!,
         ));
       }
       if (res.messageId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'sendbird.message.id',
           res.messageId!,
         ));
       }
       if (res.messageType != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'sendbird.message.type',
           res.messageType!,
         ));
       }
       if (res.customType != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'sendbird.message.custom_type',
           res.customType!,
         ));
       }
       if (res.fileSizeBytes != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'sendbird.file.size_bytes',
           res.fileSizeBytes!,
         ));
       }
       if (res.mentionedUserCount != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'sendbird.message.mentioned_user.count',
           res.mentionedUserCount!,
         ));
       }
       if (res.threadParentId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'sendbird.thread.parent_id',
           res.threadParentId!,
         ));
       }
       if (res.deliveryStatus != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'sendbird.message.delivery_status',
           res.deliveryStatus!,
         ));
@@ -176,19 +182,19 @@ Future<T> tracedSendbird<T>({
         }
       }
       if (res.connectionState != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'sendbird.connection.state',
           res.connectionState!,
         ));
       }
       if (res.unreadCount != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'sendbird.unread.count',
           res.unreadCount!,
         ));
       }
       if (res.errorCode != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'sendbird.error.code',
           res.errorCode!,
         ));
@@ -198,7 +204,7 @@ Future<T> tracedSendbird<T>({
         );
       }
       if (res.statusCode != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'http.response.status_code',
           res.statusCode!,
         ));
@@ -209,13 +215,13 @@ Future<T> tracedSendbird<T>({
           );
         }
       }
-      if (extras.isNotEmpty) span.addAttributes(OTel.attributes(extras));
+      if (extras.isNotEmpty) span.addAttributes(OTelAPI.attributes(extras));
     }
     return r.value;
   } catch (e, st) {
-    span.addAttributes(OTel.attributes([
-      OTel.attributeString(
-        ErrorResource.errorType.key,
+    span.addAttributes(OTelAPI.attributes([
+      OTelAPI.attributeString(
+        ErrorAttributes.errorType.key,
         e.runtimeType.toString(),
       ),
     ]));
